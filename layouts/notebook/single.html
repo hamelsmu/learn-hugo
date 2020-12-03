@@ -1,0 +1,20 @@
+{{ partial "header.html" . }}
+
+{{ $dataResource := (.Resources.GetMatch "*.ipynb").RelPermalink }}
+{{ $data := getJSON "content" $dataResource }}
+{{ $lang := $data.metadata.kernelspec.language }}
+{{ $lang_fence := printf "```%s" $lang }}
+
+{{range $c := $data.cells }}
+    {{ if eq $c.cell_type "markdown" }}
+        {{delimit $c.source "" | markdownify }}
+    {{ end }}
+    {{ if eq $c.cell_type "code" }}
+        {{delimit (slice  $lang_fence (delimit $c.source "") "```") "\n" | markdownify }}
+        {{range $o := $c.outputs }}
+            {{ if $o.text }}
+                <blockquote>{{delimit $o.text ""}}</blockquote>
+            {{ end }}
+        {{ end }}
+    {{ end }}
+{{ end }}

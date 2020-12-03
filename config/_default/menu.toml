@@ -1,0 +1,12 @@
+[[shortcuts]] 
+name = "<i class='fab fa-github'></i> Github repo"
+identifier = "ds"
+url = "https://github.com/matcornic/hugo-theme-learn"
+weight = 10
+
+
+[[shortcuts]] 
+name = "<i class='fab fa-github'></i> Fastai repo"
+identifier = "fa"
+url = "https://github.com/fastai/fastai"
+weight = 10
