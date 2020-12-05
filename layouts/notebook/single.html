@@ -5,16 +5,41 @@
 {{ $lang := $data.metadata.kernelspec.language }}
 {{ $lang_fence := printf "```%s" $lang }}
 
+{{.Content }}
+
 {{range $c := $data.cells }}
     {{ if eq $c.cell_type "markdown" }}
-        {{delimit $c.source "" | markdownify }}
-    {{ end }}
-    {{ if eq $c.cell_type "code" }}
-        {{delimit (slice  $lang_fence (delimit $c.source "") "```") "\n" | markdownify }}
-        {{range $o := $c.outputs }}
-            {{ if $o.text }}
-                <blockquote>{{delimit $o.text ""}}</blockquote>
+        {{ if not (findRE "^!\\[.+\\]\\(attachment:\\w+.\\w+\\)$" (chomp (index $c.source 0))) }}
+            {{ with delimit $c.source "" }}
+                {{ . | markdownify | emojify }}
             {{ end }}
         {{ end }}
     {{ end }}
+    {{ if eq $c.cell_type "code" }}
+        {{ if ge (len $c.source) 1 }}
+            {{delimit (slice $lang_fence (delimit $c.source "") "```") "\n" | markdownify }}
+        {{ end }}
+        {{range $o := $c.outputs }}
+            {{ with (default $o.text $o.traceback) }}
+                <blockquote>{{delimit . "" | lower }}</blockquote>
+            {{ end }}
+            {{ with $o.data }}
+                {{ $html := (index . "text/html") }}
+                {{ $png_img := (index . "image/png") }}
+                {{ if $html }}
+                    {{ delimit $html ""}}
+                {{ end }}
+                {{ if $png_img }}
+                    <img src="data:image/png;base64, {{$png_img}}" />
+                {{ end }}
+            {{ end }}
+        {{ end }}
+    {{ end }}
+    {{ range $key, $value := $c.attachments }}
+        {{ range $ikey, $png_img := $value }}
+            <img src="data:image/png;base64, {{$png_img}}" />
+        {{ end }}
+    {{ end }}
 {{ end }}
+
+{{ partial "footer.html" . }}
