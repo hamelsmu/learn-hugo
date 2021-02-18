@@ -11,5 +11,4 @@ A gif:
 
 A png:
 
-![](shelves.png
-)
+![](shelves.png)
